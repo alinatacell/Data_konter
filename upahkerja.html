@@ -122,7 +122,20 @@ const CSV_FIX  = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz
 function rupiah(n){ return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n)||0); }
 function parseCSV(text){const rows=[];let row=[];let field='';let inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(c=='"'){if(inQ&&text[i+1]=='"'){field+='"';i++}else inQ=!inQ}else if(c==','&&!inQ){row.push(field);field=''}else if((c=='\n'||c=='\r')&&!inQ){if(field!==''||row.length>0){row.push(field);rows.push(row);row=[];field=''}if(c=='\r'&&text[i+1]=='\n')i++}else field+=c}if(field!==''||row.length>0){row.push(field);rows.push(row)}return rows}
 function parseDateFlexible(s){if(!s)return null;s=s.toString().trim().replace(/"/g,'');let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m){return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]))}m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m){return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]))}const d=new Date(s);return isNaN(d)?null:d}
-function num(v){if(v==null)return 0;let s=v.toString().replace(/[^0-9\-]/g,'').trim();if(s===''||s==='-')return 0;const n=Number(s);return isNaN(n)?0:n}
+function num(v){
+  if(v==null) return 0;
+  let s=v.toString().trim();
+  if(s.includes('/') && s.length <= 10) return 0;
+  let low=s.toLowerCase();
+  if(low.includes('agustus')||low.includes('senin')||low.includes('selasa')||low.includes('rabu')||low.includes('kamis')||low.includes('jumat')||low.includes('sabtu')||low.includes('minggu')) return 0;
+  s=s.replace(/Rp/gi,'').trim();
+  s=s.replace(/\./g,'').replace(/,/g,'');
+  s=s.replace(/[^0-9\-]/g,'').trim();
+  if(s===''||s==='-') return 0;
+  const n=Number(s);
+  if(isNaN(n) || n > 5000000 || n < 0) return 0;
+  return n;
+}
 async function fetchCSV(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return parseCSV(await res.text())}
 function containsAmbilUang(text){const s=text.toLowerCase();return s.includes('ambil')&&(s.includes('uang')||s.includes('unag'))}
 async function loadData(){
@@ -144,9 +157,21 @@ async function loadData(){
     document.getElementById('badgePeriode').textContent=`1 - ${endDate.getDate()} ${endDate.toLocaleDateString('id-ID',{month:'short'})}`;
     let farhanUpah=0,zakaUpah=0;parsedUpah.forEach(({d,r})=>{if(d>=startDate&&d<=endDate){farhanUpah+=num(r[5]);zakaUpah+=num(r[11])}});
     let history=[];let farhanAmbil=0,zakaAmbil=0;
-    fixRows.forEach(r=>{const d=parseDateFlexible(r[0]);if(!d)return;if(d<startDate||d>endDate)return;const rowText=r.join(' ').toLowerCase();if(!containsAmbilUang(rowText))return;const isFarhan=rowText.includes('farhan');const isZaka=rowText.includes('zaka');if(!isFarhan&&!isZaka)return;let nominal=num(r[12]||0);if(nominal===0)nominal=num(r[11]||0);if(nominal===0){let max=0;r.forEach(c=>{const n=num(c);if(n>1000&&n>max)max=n});nominal=max}if(nominal===0)return;history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});if(isFarhan)farhanAmbil+=nominal;if(isZaka)zakaAmbil+=nominal});
-    history.sort((a,b)=>b.d-a.d);
-    const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
+fixRows.forEach(r=>{
+  const d=parseDateFlexible(r[0]);if(!d)return;if(d<startDate||d>endDate)return;
+  const rowText=r.join(' ').toLowerCase();if(!containsAmbilUang(rowText))return;
+  const isFarhan=rowText.includes('farhan');const isZaka=rowText.includes('zaka');if(!isFarhan&&!isZaka)return;
+  let nominal=0;
+  for(let col=12; col>=8; col--){
+    const n=num(r[col]||0);
+    if(n>0){nominal=n;break;}
+  }
+  if(nominal===0)return;
+  history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
+  if(isFarhan)farhanAmbil+=nominal;if(isZaka)zakaAmbil+=nominal
+});
+history.sort((a,b)=>b.d-a.d);
+const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
     document.getElementById('farhanUpah').textContent=rupiah(farhanUpah);document.getElementById('farhanUpah2').textContent=rupiah(farhanUpah);
     document.getElementById('farhanUpahSub').textContent=`${parsedUpah.filter(p=>p.d>=startDate&&p.d<=endDate).length} hari`;
     document.getElementById('zakaUpah').textContent=rupiah(zakaUpah);document.getElementById('zakaUpah2').textContent=rupiah(zakaUpah);

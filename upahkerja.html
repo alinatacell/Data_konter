@@ -178,26 +178,29 @@ async function loadData(){
     });
 
     let history=[];let farhanAmbil=0,zakaAmbil=0;
-    fixRows.forEach(r=>{
-      const d=parseDateFlexible(r[0]);if(!d)return;
-      if(d<startDate||d>endDate) return; // filter bulan ini
-      const fullText=r.join(' ').toLowerCase();
-      if(!containsAmbilUang(fullText)) return;
-      const isFarhan=fullText.includes('farhan');const isZaka=fullText.includes('zaka');if(!isFarhan&&!isZaka)return;
+fixRows.forEach(r=>{
+  const d=parseDateFlexible(r[0]);if(!d)return;
+  if(d<startDate||d>endDate) return;
+  const fullText=r.join(' ').toLowerCase();
+  // CARI KATA KUNCI DI SELURUH BARIS
+  if(!fullText.includes('ambil uang') &&!fullText.includes('pengambilan uang') &&!fullText.includes('ambil unag')) return;
 
-      // CARI NOMINAL DI BARIS YANG SAMA - PRIORITAS KOLOM KANAN
-      let nominal=0;
-      for(let i=r.length-1; i>=0; i--){
-        const n=num(r[i]);
-        if(n>0){nominal=n;break;}
-      }
-      if(nominal===0) return;
-      history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
-      if(isFarhan)farhanAmbil+=nominal;if(isZaka)zakaAmbil+=nominal;
-    });
+  const isFarhan=fullText.includes('farhan');
+  const isZaka=fullText.includes('zaka');
+  if(!isFarhan&&!isZaka) return;
 
-    history.sort((a,b)=>b.d-a.d);
-    const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
+  // AMBIL NOMINAL HANYA DARI KOLOM M (index 12)
+  let rawM = r[12] || r[11] || "0"; // M dulu, kalau kosong coba L
+  let nominal = Number(rawM.toString().replace(/[^0-9]/g,'')) || 0;
+
+  if(nominal < 1000) return; // skip kalau 0, 1, 2
+
+  history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
+  if(isFarhan)farhanAmbil+=nominal;
+  if(isZaka)zakaAmbil+=nominal;
+});
+history.sort((a,b)=>b.d-a.d);
+const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
     document.getElementById('farhanUpah').textContent=rupiah(farhanUpah);document.getElementById('farhanUpah2').textContent=rupiah(farhanUpah);
     document.getElementById('farhanUpahSub').textContent=`${parsedUpah.filter(p=>p.d>=startDate&&p.d<=endDate).length} hari`;
     document.getElementById('zakaUpah').textContent=rupiah(zakaUpah);document.getElementById('zakaUpah2').textContent=rupiah(zakaUpah);

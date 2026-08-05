@@ -118,26 +118,37 @@ td{padding:9px 8px;border-bottom:1px solid #f1f5f9;font-size:11px}
 <script>
 const SHEET_ID = "1iPbtRGldW5yz6tuUZ5oHzMGsnNb4cHyCbAEMkq51qK4";
 const CSV_UPAH = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=UPAH&nocache=${t}`;
-const CSV_FIX  = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=FIX%20RUMUS1&nocache=${t}`;
+const CSV_FIX = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=FIX%20RUMUS1&nocache=${t}`;
+
 function rupiah(n){ return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n)||0); }
+
 function parseCSV(text){const rows=[];let row=[];let field='';let inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(c=='"'){if(inQ&&text[i+1]=='"'){field+='"';i++}else inQ=!inQ}else if(c==','&&!inQ){row.push(field);field=''}else if((c=='\n'||c=='\r')&&!inQ){if(field!==''||row.length>0){row.push(field);rows.push(row);row=[];field=''}if(c=='\r'&&text[i+1]=='\n')i++}else field+=c}if(field!==''||row.length>0){row.push(field);rows.push(row)}return rows}
+
 function parseDateFlexible(s){if(!s)return null;s=s.toString().trim().replace(/"/g,'');let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m){return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]))}m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m){return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]))}const d=new Date(s);return isNaN(d)?null:d}
+
+// FIX TOTAL - anti Rp 1 dan Rp Triliunan
 function num(v){
   if(v==null) return 0;
   let s=v.toString().trim();
-  if(s.includes('/') && s.length <= 10) return 0;
-  let low=s.toLowerCase();
-  if(low.includes('agustus')||low.includes('senin')||low.includes('selasa')||low.includes('rabu')||low.includes('kamis')||low.includes('jumat')||low.includes('sabtu')||low.includes('minggu')) return 0;
-  s=s.replace(/Rp/gi,'').trim();
-  s=s.replace(/\./g,'').replace(/,/g,'');
-  s=s.replace(/[^0-9\-]/g,'').trim();
+  if(s==='') return 0;
+  if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s)) return 0; // tanggal
+  if(s.toLowerCase().includes('karyawan')) return 0; // biar "Karyawan 1" gak kebaca 1
+  s=s.replace(/Rp/gi,'').replace(/\./g,'').replace(/,/g,'').replace(/[^0-9\-]/g,'').trim();
   if(s===''||s==='-') return 0;
   const n=Number(s);
-  if(isNaN(n) || n > 5000000 || n < 0) return 0;
+  if(isNaN(n) || n < 1000 || n > 5000000) return 0; // pengambilan wajar 1rb - 5jt
   return n;
 }
+function numUpah(v){
+  if(v==null) return 0;
+  let s=v.toString().replace(/[^0-9\-]/g,'').trim();
+  if(s===''||s==='-') return 0;
+  const n=Number(s);
+  return isNaN(n)?0:n;
+}
 async function fetchCSV(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return parseCSV(await res.text())}
-function containsAmbilUang(text){const s=text.toLowerCase();return s.includes('ambil')&&(s.includes('uang')||s.includes('unag'))}
+function containsAmbilUang(text){const s=text.toLowerCase();return s.includes('ambil uang')||s.includes('pengambilan uang')||s.includes('ambil unag')}
+
 async function loadData(){
   const t=Date.now();
   try{
@@ -146,32 +157,47 @@ async function loadData(){
     const upahRows=rowsUpahRaw.slice(upahHeaderIdx+1);
     let fixHeaderIdx=-1;for(let i=0;i<Math.min(5,rowsFixRaw.length);i++){if(rowsFixRaw[i].join(' ').toLowerCase().includes('karyawan')){fixHeaderIdx=i;break}}if(fixHeaderIdx===-1)fixHeaderIdx=0;
     const fixRows=rowsFixRaw.slice(fixHeaderIdx+1);
+
+    // === FIX PERIODE - PAKAI BULAN KALENDER SAAT INI, BUKAN latestRaw ===
+    const now = new Date();
+    let startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    let endDate = new Date(now.getFullYear(), now.getMonth()+1, 0);
+    // kalau mau lihat bulan lalu pas tgl 1-3, buka manual? kita kunci bulan ini dulu biar gak loncat
+
+    document.getElementById('badgePeriode').textContent=`1 - ${endDate.getDate()} ${endDate.toLocaleDateString('id-ID',{month:'short'})}`;
+
     let allDates=[];let parsedUpah=[];
     upahRows.forEach(r=>{if(!r||r.length<6)return;const d=parseDateFlexible(r[0]);if(!d)return;if(r.join('').trim()==='')return;parsedUpah.push({d,r});allDates.push(d)});
-    fixRows.forEach(r=>{const d=parseDateFlexible(r[0]);if(d)allDates.push(d)});
-    if(allDates.length===0)throw new Error('Tidak ada tanggal');
-    let latestRaw=new Date(Math.max(...allDates.map(d=>d.getTime())));
-    let target;if(latestRaw.getDate()<=3){target=new Date(latestRaw.getFullYear(),latestRaw.getMonth()-1,1)}else{target=new Date(latestRaw.getFullYear(),latestRaw.getMonth(),1)}
-    let startDate=new Date(target.getFullYear(),target.getMonth(),1);
-    let endDate=new Date(target.getFullYear(),target.getMonth()+1,0);
-    document.getElementById('badgePeriode').textContent=`1 - ${endDate.getDate()} ${endDate.toLocaleDateString('id-ID',{month:'short'})}`;
-    let farhanUpah=0,zakaUpah=0;parsedUpah.forEach(({d,r})=>{if(d>=startDate&&d<=endDate){farhanUpah+=num(r[5]);zakaUpah+=num(r[11])}});
+
+    let farhanUpah=0,zakaUpah=0;
+    parsedUpah.forEach(({d,r})=>{
+      if(d>=startDate&&d<=endDate){
+        farhanUpah+=numUpah(r[5]);
+        zakaUpah+=numUpah(r[11]);
+      }
+    });
+
     let history=[];let farhanAmbil=0,zakaAmbil=0;
-fixRows.forEach(r=>{
-  const d=parseDateFlexible(r[0]);if(!d)return;if(d<startDate||d>endDate)return;
-  const rowText=r.join(' ').toLowerCase();if(!containsAmbilUang(rowText))return;
-  const isFarhan=rowText.includes('farhan');const isZaka=rowText.includes('zaka');if(!isFarhan&&!isZaka)return;
-  let nominal=0;
-  for(let col=12; col>=8; col--){
-    const n=num(r[col]||0);
-    if(n>0){nominal=n;break;}
-  }
-  if(nominal===0)return;
-  history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
-  if(isFarhan)farhanAmbil+=nominal;if(isZaka)zakaAmbil+=nominal
-});
-history.sort((a,b)=>b.d-a.d);
-const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
+    fixRows.forEach(r=>{
+      const d=parseDateFlexible(r[0]);if(!d)return;
+      if(d<startDate||d>endDate) return; // filter bulan ini
+      const fullText=r.join(' ').toLowerCase();
+      if(!containsAmbilUang(fullText)) return;
+      const isFarhan=fullText.includes('farhan');const isZaka=fullText.includes('zaka');if(!isFarhan&&!isZaka)return;
+
+      // CARI NOMINAL DI BARIS YANG SAMA - PRIORITAS KOLOM KANAN
+      let nominal=0;
+      for(let i=r.length-1; i>=0; i--){
+        const n=num(r[i]);
+        if(n>0){nominal=n;break;}
+      }
+      if(nominal===0) return;
+      history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
+      if(isFarhan)farhanAmbil+=nominal;if(isZaka)zakaAmbil+=nominal;
+    });
+
+    history.sort((a,b)=>b.d-a.d);
+    const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
     document.getElementById('farhanUpah').textContent=rupiah(farhanUpah);document.getElementById('farhanUpah2').textContent=rupiah(farhanUpah);
     document.getElementById('farhanUpahSub').textContent=`${parsedUpah.filter(p=>p.d>=startDate&&p.d<=endDate).length} hari`;
     document.getElementById('zakaUpah').textContent=rupiah(zakaUpah);document.getElementById('zakaUpah2').textContent=rupiah(zakaUpah);
@@ -181,7 +207,7 @@ const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
     document.getElementById('farhanSisa').textContent=rupiah(farhanSisa);document.getElementById('farhanSisa2').textContent=rupiah(farhanSisa);
     document.getElementById('zakaSisa').textContent=rupiah(zakaSisa);document.getElementById('zakaSisa2').textContent=rupiah(zakaSisa);
     let htmlHist='';history.slice(0,80).forEach(h=>{const isFarhan=h.karyawan==='farhan';htmlHist+=`<tr><td>${h.d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}</td><td><span class="pill ${isFarhan?'pill-green':'pill-red'}">${isFarhan?'Farhan':'Zaka'}</span></td><td style="font-weight:800;color:#dc2626">${rupiah(h.nominal)}</td></tr>`});
-    document.getElementById('history').innerHTML=htmlHist||'<tr><td colspan="3" style="text-align:center;padding:20px">Tidak ada data</td></tr>';
+    document.getElementById('history').innerHTML=htmlHist||'<tr><td colspan="3" style="text-align:center;padding:20px">Tidak ada data bulan ini</td></tr>';
   }catch(e){document.getElementById('history').innerHTML=`<tr><td colspan="3" style="color:red">❌ ${e.message}</td></tr>`}
 }
 loadData();

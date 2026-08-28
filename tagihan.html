@@ -1,9 +1,30 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KONTER 2026 - Data Live</title>
+<title>KONTER 2026 - Data Live + Periode Manual</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter','Poppins',sans-serif}
@@ -24,7 +45,7 @@ body{background:#eef0ff;color:#1e293b;min-height:100vh}
 .tabs{display:flex;background:white;border-radius:14px;padding:4px;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,.04);border:1px solid #e8eaff}
 .tabs button{flex:1;padding:11px 8px;border:0;background:transparent;border-radius:10px;font-weight:700;font-size:11px;color:#64748b;cursor:pointer;transition:.2s;font-family:'Poppins';line-height:1.2}
 .tabs button.active{background:linear-gradient(135deg,#0b63f0,#1976ff);color:white;box-shadow:0 4px 10px rgba(11,99,240,.25)}
-.tabs button.active small{color:rgba(255,255,.9)}
+.tabs button.active small{color:rgba(255,255,255,.9)}
 .table-wrap{overflow:auto;max-height:70vh}
 table{width:100%;border-collapse:collapse;font-size:11px;min-width:600px}
 th{background:linear-gradient(135deg,#0b63f0,#3b82f6);color:white;padding:10px 10px;text-align:left;font-family:'Poppins';font-size:11px;font-weight:700;position:sticky;top:0;z-index:2;white-space:nowrap}
@@ -35,7 +56,7 @@ tr.total td{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;fon
 .empty{text-align:center;padding:30px;color:#94a3b8}
 .footer{text-align:center;padding:14px;color:#94a3b8;font-size:10px}
 .loading{text-align:center;padding:20px;color:#64748b;font-size:12px}
-.info-period{background:#fef3c7;color:#92400e;padding:8px 12px;font-size:10px;font-weight:700;text-align:center;border-bottom:1px solid #fde68a}
+.info-period{background:#fef3c7;color:#92400e;padding:8px 12px;font-size:10px;font-weight:700;text-align:center;border-bottom:1px solid #fde68a;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
 .error-box{background:#fee2e2;color:#991b1b;padding:12px;margin:10px;border-radius:8px;font-size:11px}
 .rekening-box{background:linear-gradient(135deg,#1e3a8a,#1e40af);color:white;padding:16px;margin:12px;border-radius:14px;box-shadow:0 6px 16px rgba(30,64,175,.3)}
 .rekening-box h4{font-family:'Poppins';font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -46,6 +67,24 @@ tr.total td{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;fon
 .copy-btn:hover{background:rgba(255,255,255,.3)}
 .wa-btn{background:#25d366;color:white;padding:10px 16px;border-radius:10px;font-weight:800;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-top:10px;width:100%;justify-content:center}
 .wa-btn:hover{background:#20ba5a}
+
+/* NEW PERIOD CONTROLS */
+.period-controls{background:#f8faff;border-bottom:1px solid #e8eaff;padding:12px;display:flex;flex-direction:column;gap:10px}
+.period-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.period-left{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.select-periode{padding:9px 12px;border-radius:10px;border:1.5px solid #dbeafe;background:white;font-size:11px;font-weight:700;color:#1e293b;outline:none;cursor:pointer;min-width:200px}
+.select-periode:focus{border-color:#0b63f0}
+.btn-nav{padding:8px 12px;border-radius:8px;border:1px solid #dbeafe;background:white;font-size:11px;font-weight:700;color:#0b63f0;cursor:pointer}
+.btn-nav:hover{background:#eff6ff}
+.btn-apply{padding:9px 16px;border-radius:10px;border:0;background:linear-gradient(135deg,#0b63f0,#1976ff);color:white;font-weight:800;font-size:11px;cursor:pointer;box-shadow:0 4px 10px rgba(11,99,240,.25)}
+.btn-apply:hover{opacity:.9}
+.manual-box{background:white;border:1.5px dashed #bfdbfe;border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+.manual-field{display:flex;flex-direction:column;gap:4px}
+.manual-field label{font-size:10px;font-weight:800;color:#475569;letter-spacing:.3px}
+.date-input{padding:8px 10px;border-radius:8px;border:1.5px solid #e2e8f0;font-size:12px;font-weight:600;outline:none;min-width:145px}
+.date-input:focus{border-color:#0b63f0}
+.chip-quick{padding:6px 10px;border-radius:20px;background:#eef2ff;border:1px solid #dbeafe;font-size:10px;font-weight:700;color:#1e40af;cursor:pointer}
+.chip-quick:hover{background:#dbeafe}
 </style>
 </head>
 <body>
@@ -109,9 +148,47 @@ tr.total td{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;fon
   </div>
 
   <div id="t2" style="display:none">
+    <!-- CONTROLS BARU -->
+    <div class="period-controls">
+      <div class="period-top">
+        <div class="period-left">
+          <select id="mode-periode" class="select-periode" onchange="onModeChange()">
+            <option value="auto">📅 Minggu Ini (Jumat-Kamis)</option>
+            <option value="prev">⬅️ Minggu Lalu</option>
+            <option value="manual">✏️ Periode Manual</option>
+            <option value="bulan">📆 Bulan Ini</option>
+            <option value="bulan_lalu">📆 Bulan Lalu</option>
+            <option value="semua">📂 Semua Data</option>
+          </select>
+          <div id="nav-week" style="display:flex;gap:6px">
+            <button class="btn-nav" onclick="changeWeek(-1)">← Sebelumnya</button>
+            <button class="btn-nav" onclick="changeWeek(1)">Berikutnya →</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="chip-quick" onclick="quickSet(7)">7 Hari</button>
+          <button class="chip-quick" onclick="quickSet(14)">14 Hari</button>
+          <button class="chip-quick" onclick="quickSet(30)">30 Hari</button>
+        </div>
+      </div>
+
+      <div id="manual-box" class="manual-box" style="display:none">
+        <div class="manual-field">
+          <label>Dari Tanggal</label>
+          <input type="date" id="tgl-mulai" class="date-input">
+        </div>
+        <div class="manual-field">
+          <label>Sampai Tanggal</label>
+          <input type="date" id="tgl-akhir" class="date-input">
+        </div>
+        <button class="btn-apply" onclick="applyManual()">🔍 Tampilkan</button>
+        <button class="btn-nav" onclick="resetManual()">Reset</button>
+      </div>
+    </div>
+
     <div class="info-period" id="info-periode">Periode: Loading...</div>
     <div class="card-head">
-      <h3>🛒 RINCIAN BELANJA MINGGU INI</h3>
+      <h3>🛒 RINCIAN BELANJA</h3>
       <span class="badge badge-green" id="count-rincian">0 Transaksi</span>
     </div>
     <div class="table-wrap">
@@ -133,6 +210,10 @@ tr.total td{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af;fon
 const URL_TAGIHAN = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=2045267299&single=true&output=csv';
 const URL_RINCIAN = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAP_R50frV13whqx54ctjplc-8xhcN53rHEVk5mkhLeZE283xWnr6TdTBFr-KFymEiaYE_NWgGthpo/pub?gid=1930633596&single=true&output=csv';
 
+let weekOffset = 0;
+let currentMode = 'auto';
+let allRincianRows = []; // simpan semua data untuk filter lokal
+
 function tab(n){
   document.getElementById('t1').style.display=n==1?'block':'none';
   document.getElementById('t2').style.display=n==2?'block':'none';
@@ -153,22 +234,16 @@ function parseCSV(text) {
   let currentRow = [];
   let currentCell = '';
   let inQuotes = false;
-  
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
     const nextChar = text[i + 1];
-    
     if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        currentCell += '"';
-        i++;
-      } else {
-        inQuotes =!inQuotes;
-      }
-    } else if (char === ',' &&!inQuotes) {
+      if (inQuotes && nextChar === '"') { currentCell += '"'; i++; }
+      else { inQuotes = !inQuotes; }
+    } else if (char === ',' && !inQuotes) {
       currentRow.push(currentCell.trim());
       currentCell = '';
-    } else if (char === '\n' &&!inQuotes) {
+    } else if (char === '\n' && !inQuotes) {
       currentRow.push(currentCell.trim());
       if (currentRow.some(cell => cell!== '')) rows.push(currentRow);
       currentRow = [];
@@ -177,62 +252,163 @@ function parseCSV(text) {
       currentCell += char;
     }
   }
-  
   if (currentCell || currentRow.length > 0) {
     currentRow.push(currentCell.trim());
     if (currentRow.some(cell => cell!== '')) rows.push(currentRow);
   }
-  
   return rows;
 }
 
-function getLastFridayToThursday() {
+function getFridayThursday(offsetWeeks = 0){
   const today = new Date();
   const day = today.getDay();
-  const diff = day >= 5? day - 5 : day + 2;
+  const diff = day >= 5 ? day - 5 : day + 2;
   const friday = new Date(today);
-  friday.setDate(today.getDate() - diff);
+  friday.setDate(today.getDate() - diff + (offsetWeeks*7));
   friday.setHours(0,0,0,0);
-  
   const thursday = new Date(friday);
   thursday.setDate(friday.getDate() + 6);
   thursday.setHours(23,59,59,999);
-  
   return {friday, thursday};
 }
 
-function parseDate(dateStr) {
-  const parts = dateStr.split(/[\/\-]/);
-  if(parts.length === 3) {
-    return new Date(parts[2], parts[1]-1, parts[0]);
+function parseDate(dateStr){
+  if(!dateStr) return null;
+  dateStr = dateStr.trim();
+  // format 28/08/2026 atau 28-08-2026 atau 2026-08-28
+  if(dateStr.includes('/')){
+    const parts = dateStr.split('/');
+    if(parts.length===3) return new Date(parts[2], parts[1]-1, parts[0]);
+  } else if(dateStr.match(/^\d{4}-\d{2}-\d{2}/)){
+    const d = new Date(dateStr);
+    return isNaN(d) ? null : d;
+  } else if(dateStr.includes('-')){
+    const parts = dateStr.split('-');
+    if(parts.length===3 && parts[0].length<=2) return new Date(parts[2], parts[1]-1, parts[0]);
+    if(parts.length===3) return new Date(parts[0], parts[1]-1, parts[2]);
   }
   return null;
+}
+
+function formatTgl(d){ return d.toLocaleDateString('id-ID', {day:'2-digit',month:'short'}); }
+function formatTglFull(d){ return d.toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'}); }
+function toInputDate(d){
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function getPeriod(){
+  const now = new Date();
+  if(currentMode === 'auto'){
+    const {friday, thursday} = getFridayThursday(weekOffset);
+    return {start: friday, end: thursday, label: `Jumat ${formatTgl(friday)} - Kamis ${formatTgl(thursday)} ${thursday.getFullYear()}`, short: `${formatTgl(friday)} - ${formatTgl(thursday)}`};
+  } else if(currentMode === 'prev'){
+    const {friday, thursday} = getFridayThursday(weekOffset-1);
+    return {start: friday, end: thursday, label: `Jumat ${formatTgl(friday)} - Kamis ${formatTgl(thursday)} ${thursday.getFullYear()} (Minggu Lalu)`, short: `${formatTgl(friday)} - ${formatTgl(thursday)}`};
+  } else if(currentMode === 'manual'){
+    const s = document.getElementById('tgl-mulai').value;
+    const e = document.getElementById('tgl-akhir').value;
+    if(!s || !e) return null;
+    const start = new Date(s); start.setHours(0,0,0,0);
+    const end = new Date(e); end.setHours(23,59,59,999);
+    if(start > end) return {start:end, end:start, label:`${formatTglFull(end)} - ${formatTglFull(start)} (Manual)`, short:`${formatTgl(end)} - ${formatTgl(start)}`};
+    return {start, end, label:`${formatTglFull(start)} - ${formatTglFull(end)} (Manual)`, short:`${formatTgl(start)} - ${formatTgl(end)}`};
+  } else if(currentMode === 'bulan'){
+    const start = new Date(now.getFullYear(), now.getMonth(), 1); start.setHours(0,0,0,0);
+    const end = new Date(now.getFullYear(), now.getMonth()+1, 0); end.setHours(23,59,59,999);
+    return {start, end, label:`Bulan Ini: ${formatTglFull(start)} - ${formatTglFull(end)}`, short:`${formatTgl(start)} - ${formatTgl(end)}`};
+  } else if(currentMode === 'bulan_lalu'){
+    const start = new Date(now.getFullYear(), now.getMonth()-1, 1); start.setHours(0,0,0,0);
+    const end = new Date(now.getFullYear(), now.getMonth(), 0); end.setHours(23,59,59,999);
+    return {start, end, label:`Bulan Lalu: ${formatTglFull(start)} - ${formatTglFull(end)}`, short:`${formatTgl(start)} - ${formatTgl(end)}`};
+  } else if(currentMode === 'semua'){
+    return null; // semua data
+  }
+  return null;
+}
+
+function onModeChange(){
+  currentMode = document.getElementById('mode-periode').value;
+  const manualBox = document.getElementById('manual-box');
+  const navWeek = document.getElementById('nav-week');
+
+  if(currentMode === 'manual'){
+    manualBox.style.display = 'flex';
+    navWeek.style.display = 'none';
+    // isi default tanggal = periode minggu ini jika kosong
+    if(!document.getElementById('tgl-mulai').value){
+      const {friday, thursday} = getFridayThursday(weekOffset);
+      document.getElementById('tgl-mulai').value = toInputDate(friday);
+      document.getElementById('tgl-akhir').value = toInputDate(thursday);
+    }
+  } else if(currentMode === 'auto' || currentMode === 'prev'){
+    manualBox.style.display = 'none';
+    navWeek.style.display = 'flex';
+    if(currentMode === 'prev' && weekOffset===0) weekOffset = -1;
+    if(currentMode === 'auto') weekOffset = 0;
+    renderRincianFromCache();
+  } else {
+    manualBox.style.display = 'none';
+    navWeek.style.display = 'none';
+    renderRincianFromCache();
+  }
+}
+
+function changeWeek(dir){
+  weekOffset += dir;
+  currentMode = 'auto';
+  document.getElementById('mode-periode').value = 'auto';
+  renderRincianFromCache();
+}
+
+function quickSet(days){
+  const end = new Date(); end.setHours(23,59,59,999);
+  const start = new Date(); start.setDate(end.getDate()-(days-1)); start.setHours(0,0,0,0);
+  currentMode = 'manual';
+  document.getElementById('mode-periode').value = 'manual';
+  document.getElementById('manual-box').style.display = 'flex';
+  document.getElementById('nav-week').style.display = 'none';
+  document.getElementById('tgl-mulai').value = toInputDate(start);
+  document.getElementById('tgl-akhir').value = toInputDate(end);
+  renderRincianFromCache();
+}
+
+function applyManual(){
+  const s = document.getElementById('tgl-mulai').value;
+  const e = document.getElementById('tgl-akhir').value;
+  if(!s || !e){ alert('Pilih tanggal mulai & akhir dulu'); return; }
+  renderRincianFromCache();
+}
+
+function resetManual(){
+  const {friday, thursday} = getFridayThursday(0);
+  document.getElementById('tgl-mulai').value = toInputDate(friday);
+  document.getElementById('tgl-akhir').value = toInputDate(thursday);
+  weekOffset = 0;
+  currentMode = 'auto';
+  document.getElementById('mode-periode').value = 'auto';
+  document.getElementById('manual-box').style.display = 'none';
+  document.getElementById('nav-week').style.display = 'flex';
+  renderRincianFromCache();
 }
 
 async function loadTagihan() {
   try {
     const res = await fetch(URL_TAGIHAN);
     if(!res.ok) throw new Error('HTTP ' + res.status);
-    
     const text = await res.text();
     if(text.includes('<!DOCTYPE html>')) throw new Error('Sheet belum di-publish ke CSV');
-    
     const rows = parseCSV(text);
-    
-    // BUANG BARIS 1 & 2, AMBIL BARIS 3-14 = INDEX 2-13
     rows.splice(0, 2);
     const dataRows = rows.slice(0, 12);
-
     let html = '';
     let count = 0;
-
     dataRows.forEach(row => {
       const colA = row[0] || '';
       const colB = row[1] || '';
       const colC = row[2] || '';
       const colD = row[3] || '';
       const colE = row[4] || '';
-
       if(colA) {
         count++;
         const isTotal = colA.toLowerCase().includes('jumlah');
@@ -245,12 +421,10 @@ async function loadTagihan() {
         </tr>`;
       }
     });
-
     document.getElementById('data-tagihan').innerHTML = html || '<tr><td colspan="5" class="empty">Data kosong</td></tr>';
     document.getElementById('count-tagihan').textContent = count + ' Baris';
     document.getElementById('error-tagihan').innerHTML = '';
   } catch(e) {
-    console.error('Error loadTagihan:', e);
     document.getElementById('data-tagihan').innerHTML = '<tr><td colspan="5" class="empty">Gagal load data</td></tr>';
     document.getElementById('error-tagihan').innerHTML = `<div class="error-box">Error: ${e.message}</div>`;
   }
@@ -258,38 +432,61 @@ async function loadTagihan() {
 
 async function loadRincian() {
   try {
-    const {friday, thursday} = getLastFridayToThursday();
-    const formatTgl = (d) => d.toLocaleDateString('id-ID', {day:'2-digit',month:'short'});
-    document.getElementById('info-periode').textContent = `Periode: Jumat ${formatTgl(friday)} - Kamis ${formatTgl(thursday)} 2026`;
-    document.getElementById('periode-text').textContent = `${formatTgl(friday)} - ${formatTgl(thursday)}`;
-
     const res = await fetch(URL_RINCIAN);
     const text = await res.text();
     const rows = parseCSV(text);
-    rows.shift();
-
-    let html = '';
-    let count = 0;
-
-    rows.reverse().forEach((row, idx) => {
-      if(row[0] && row[0].trim()!== '') {
-        const tanggal = parseDate(row[0]);
-        if(tanggal && tanggal >= friday && tanggal <= thursday) {
-          count++;
-          html += `<tr>
-            <td style="white-space:nowrap">${row[0] || ''}</td>
-            <td>${row[1] || ''}</td>
-            <td>${row[2] || ''}</td>
-          </tr>`;
-        }
-      }
-    });
-
-    document.getElementById('data-rincian').innerHTML = html || '<tr><td colspan="3" class="empty">Tidak ada transaksi minggu ini</td></tr>';
-    document.getElementById('count-rincian').textContent = count + ' Transaksi';
+    rows.shift(); // buang header
+    allRincianRows = rows.filter(r => r[0] && r[0].trim()!=='');
+    renderRincianFromCache();
   } catch(e) {
     document.getElementById('data-rincian').innerHTML = '<tr><td colspan="3" class="empty">Gagal load data</td></tr>';
   }
+}
+
+function renderRincianFromCache(){
+  const period = getPeriod();
+  let labelPeriode, shortLabel;
+  if(period){
+    labelPeriode = period.label;
+    shortLabel = period.short;
+    document.getElementById('info-periode').textContent = `Periode: ${labelPeriode}`;
+    document.getElementById('periode-text').textContent = shortLabel;
+  } else {
+    labelPeriode = 'Semua Data';
+    shortLabel = 'Semua';
+    document.getElementById('info-periode').textContent = `Periode: Semua Data (Tanpa Filter)`;
+    document.getElementById('periode-text').textContent = 'Semua Data';
+  }
+
+  let html = '';
+  let count = 0;
+  // tampilkan terbaru dulu
+  const reversed = [...allRincianRows].reverse();
+  reversed.forEach(row => {
+    const tglStr = row[0] || '';
+    const tanggal = parseDate(tglStr);
+    let show = false;
+    if(!period){ show = true; }
+    else if(tanggal && period.start && period.end){
+      if(tanggal >= period.start && tanggal <= period.end) show = true;
+    }
+    if(show){
+      count++;
+      html += `<tr>
+        <td style="white-space:nowrap">${row[0] || ''}</td>
+        <td>${row[1] || ''}</td>
+        <td>${row[2] || ''}</td>
+      </tr>`;
+    }
+  });
+
+  if(count===0){
+    const msg = period ? `Tidak ada transaksi pada ${labelPeriode}` : 'Tidak ada transaksi';
+    document.getElementById('data-rincian').innerHTML = `<tr><td colspan="3" class="empty">${msg}</td></tr>`;
+  } else {
+    document.getElementById('data-rincian').innerHTML = html;
+  }
+  document.getElementById('count-rincian').textContent = count + ' Transaksi';
 }
 
 function updateTime() {
@@ -306,5 +503,5 @@ function loadAllData() {
 loadAllData();
 setInterval(loadAllData, 120000);
 </script>
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>

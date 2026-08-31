@@ -180,7 +180,7 @@ fetch(CSV_URL).then(r=>r.text()).then(t=>{
     if(!nama) return;
     let harga= toNumberRp(c[3]);
     if(harga===0){ for(let k=2;k<Math.min(6,c.length);k++){ const v=toNumberRp(c[k]); if(v>1000){harga=v; break;}} }
-    let sisa = parseFloat(String(c[6]||"0").replace(/[^0-9.-]/g,""))||0;
+    let sisa = parseFloat(String(c[6]||"0").replace(/[^0-9999.-]/g,""))||0;
     if(isNaN(sisa)) sisa=0;
     const merk = (c[7]||"").trim().toLowerCase();
     const merkFull = c[7]||"";

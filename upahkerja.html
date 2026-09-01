@@ -1,219 +1,156 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><!-- PLAYABLE_TOUCH_PATCH_V1 --><script>
-(function() {
-  if (window.__playableTouchPatchInstalled) return;
-  window.__playableTouchPatchInstalled = true;
-  var origAdd = EventTarget.prototype.addEventListener;
-  var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
-  EventTarget.prototype.addEventListener = function(type, listener, options) {
-    if (blockedTypes[type]) {
-      if (options === undefined || options === null) {
-        options = { passive: true };
-      } else if (typeof options === 'boolean') {
-        options = { capture: options, passive: true };
-      } else {
-        options = Object.assign({}, options, { passive: true });
-      }
-    }
-    return origAdd.call(this, type, listener, options);
-  };
-})();
-</script><script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Upah - Tanpa Info Tambahan</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<title>Dashboard Upah - Periode Bulanan</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter','Poppins',Arial,sans-serif}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#eef0ff;color:#1e293b;min-height:100vh}
-.header{background:linear-gradient(135deg,#0b63f0 0%, #1976ff 100%);color:white;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 4px 12px rgba(11,99,240,.25)}
-.header .menu{width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.header .title{flex:1;text-align:center}
-.header .title b{font-family:'Poppins';font-size:15px;font-weight:800;display:block}
-.header .title small{font-size:10px;opacity:.9}
-.container{padding:12px;max-width:900px;margin:0 auto}
-.card{background:white;border-radius:18px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #e8eaff;margin-bottom:14px}
-.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.card-head h3{font-family:'Poppins';font-size:13px;font-weight:700}
-.badge{font-size:10px;padding:5px 10px;border-radius:20px;font-weight:800;background:#e0e7ff;color:#1e40af}
-.badge-green{background:#dcfce7;color:#166534}
+.header{background:linear-gradient(135deg,#0b63f0,#1976ff);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:0 4px 12px #0b63f040}
+.header .menu{width:36px;height:36px;background:#ffffff26;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.header .title{flex:1;text-align:center}.header .title b{font-size:15px;display:block}.header .title small{font-size:10px;opacity:.9}
+.container{padding:12px;max-width:900px;margin:auto}
+.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 6px 18px #0000000f;border:1px solid #e8eaff;margin-bottom:14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.card-head h3{font-size:13px;font-weight:700}
+.badge{font-size:10px;padding:5px 10px;border-radius:20px;font-weight:800;background:#e0e7ff;color:#1e40af;white-space:nowrap}.badge-green{background:#dcfce7;color:#166534}
+.period-box{background:#f8fafc;border:1px solid #dbeafe;border-radius:14px;padding:12px}
+.period-title{font-size:11px;font-weight:800;color:#475569;margin-bottom:8px}
+.period-controls{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+.period-controls select,.period-controls button{height:42px;border-radius:10px;border:2px solid #0b63f0;font:inherit;font-weight:700}
+.period-controls select{padding:0 10px;background:#fff;color:#1e293b}.period-controls button{padding:0 14px;background:#0b63f0;color:#fff;cursor:pointer}
+.period-label{text-align:center;font-size:11px;font-weight:800;color:#0b63f0;margin-top:9px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mini-card{background:white;border-radius:16px;padding:14px;position:relative;overflow:hidden;border:1px solid #eef0ff;box-shadow:0 4px 12px rgba(0,0,0,.04)}
+.mini-card{background:#fff;border-radius:16px;padding:14px;position:relative;overflow:hidden;border:1px solid #eef0ff;box-shadow:0 4px 12px #0000000a}
 .mini-card .circle{position:absolute;right:-10px;top:-10px;width:56px;height:56px;border-radius:50%;opacity:.18}
-.mini-card .label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase}
-.mini-card .value{font-family:'Poppins';font-size:18px;font-weight:800;margin:4px 0 2px}
-.mini-card.blue .circle{background:#60a5fa}.mini-card.blue .value{color:#2563eb}
-.mini-card.green .circle{background:#4ade80}.mini-card.green .value{color:#16a34a}
-.mini-card.purple .circle{background:#a78bfa}.mini-card.purple .value{color:#7c3aed}
-.mini-card.red .circle{background:#f87171}.mini-card.red .value{color:#dc2626}
-.mini-card.orange .circle{background:#fb923c}.mini-card.orange .value{color:#ea580c}
-.mini-card.dark .circle{background:#94a3b8}.mini-card.dark .value{color:#0f172a}
-.karyawan-card{border-left:5px solid #0b63f0}
-.karyawan-card.zaka{border-left-color:#8b5cf6}
-.karyawan-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:white}
-.avatar.farhan{background:linear-gradient(135deg,#0b63f0,#60a5fa)}
-.avatar.zaka{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
-.karyawan-info b{font-size:14px;display:block}
-.karyawan-info small{font-size:11px;color:#64748b}
-.row{display:flex;justify-content:space-between;margin:10px 0;font-size:13px}
-.row .label{color:#475569;font-weight:600;font-size:12px}
-.row .value{font-weight:800}
+.mini-card .label{font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase}.mini-card .value{font-size:18px;font-weight:800;margin:4px 0 2px}
+.mini-card.blue .circle{background:#60a5fa}.mini-card.blue .value{color:#2563eb}.mini-card.green .circle{background:#4ade80}.mini-card.green .value{color:#16a34a}.mini-card.purple .circle{background:#a78bfa}.mini-card.purple .value{color:#7c3aed}.mini-card.red .circle{background:#f87171}.mini-card.red .value{color:#dc2626}.mini-card.orange .circle{background:#fb923c}.mini-card.orange .value{color:#ea580c}.mini-card.dark .circle{background:#94a3b8}.mini-card.dark .value{color:#0f172a}
+.karyawan-card{border-left:5px solid #0b63f0}.karyawan-card.zaka{border-left-color:#8b5cf6}
+.karyawan-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}.avatar{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff}.avatar.farhan{background:linear-gradient(135deg,#0b63f0,#60a5fa)}.avatar.zaka{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.karyawan-info{flex:1}.karyawan-info b{font-size:14px;display:block}.karyawan-info small{font-size:11px;color:#64748b}
+.row{display:flex;justify-content:space-between;margin:10px 0;font-size:13px}.row .label{color:#475569;font-weight:600;font-size:12px}.row .value{font-weight:800}
 .sisa-box{background:#f8fafc;border-radius:12px;padding:12px;display:flex;justify-content:space-between;margin-top:8px}
-.btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#0b63f0,#1976ff);color:white;font-weight:800;cursor:pointer;margin-top:10px}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-th{background:#0b63f0;color:white;padding:10px 8px;font-size:11px;text-align:left}
-td{padding:9px 8px;border-bottom:1px solid #f1f5f9;font-size:11px}
-.pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800}
-.pill-green{background:#dcfce7;color:#166534}.pill-red{background:#fee2e2;color:#991b1b}
-/* INFO DISEMBUNYIKAN */
-#periodeBox, #lastUpdate, #debug, #farhanLast, #zakaLast { display:none !important; }
+.btn{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(135deg,#0b63f0,#1976ff);color:#fff;font-weight:800;cursor:pointer;margin-top:10px}
+table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#0b63f0;color:#fff;padding:10px 8px;font-size:11px;text-align:left}td{padding:9px 8px;border-bottom:1px solid #f1f5f9;font-size:11px}
+.pill{display:inline-block;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800}.pill-green{background:#dcfce7;color:#166534}.pill-red{background:#fee2e2;color:#991b1b}
+@media(max-width:650px){.grid2{grid-template-columns:1fr}.period-controls{grid-template-columns:1fr 1fr}.period-controls button{grid-column:1/-1}.card-head{align-items:flex-start}}
 </style>
 </head>
 <body>
 <div class="header"><div class="menu">☰</div><div class="title"><b>🏪 KONTER A YUDI THEA</b><small>Dashboard Internal Pemilik & Karyawan</small></div><div style="width:36px"></div></div>
 <div class="container">
-<div id="periodeBox"></div><div id="lastUpdate"></div>
 
 <div class="card">
-  <div class="card-head"><h3>📊 Ringkasan Upah - 1 Bulan Penuh</h3><span class="badge" id="badgePeriode">1 - 31</span></div>
-  <div class="grid2">
-    <div class="mini-card blue"><div class="circle"></div><div class="label">Total Upah Farhan</div><div class="value" id="farhanUpah">Rp0</div><div class="label" id="farhanUpahSub" style="text-transform:none">-</div></div>
-    <div class="mini-card purple"><div class="circle"></div><div class="label">Total Upah Zaka</div><div class="value" id="zakaUpah">Rp0</div><div class="label" id="zakaUpahSub" style="text-transform:none">-</div></div>
-    <div class="mini-card red"><div class="circle"></div><div class="label">Ambil Farhan</div><div class="value" id="farhanAmbil">Rp0</div></div>
-    <div class="mini-card orange"><div class="circle"></div><div class="label">Ambil Zaka</div><div class="value" id="zakaAmbil">Rp0</div></div>
-    <div class="mini-card green"><div class="circle"></div><div class="label">Sisa Farhan</div><div class="value" id="farhanSisa">Rp0</div></div>
-    <div class="mini-card dark"><div class="circle"></div><div class="label">Sisa Zaka</div><div class="value" id="zakaSisa">Rp0</div></div>
+ <div class="period-box">
+  <div class="period-title">📅 PENGATURAN PERIODE UPAH</div>
+  <div class="period-controls">
+   <select id="bulanSelect"></select>
+   <select id="tahunSelect"></select>
+   <button type="button" onclick="terapkanPeriode()">🔍 Tampilkan</button>
   </div>
+  <div class="period-label" id="periodeLabel">Memuat periode...</div>
+ </div>
+</div>
+
+<div class="card">
+ <div class="card-head"><h3>📊 Ringkasan Upah - 1 Bulan Penuh</h3><span class="badge" id="badgePeriode">-</span></div>
+ <div class="grid2">
+  <div class="mini-card blue"><div class="circle"></div><div class="label">Total Upah Farhan</div><div class="value" id="farhanUpah">Rp0</div><div class="label" id="farhanUpahSub">-</div></div>
+  <div class="mini-card purple"><div class="circle"></div><div class="label">Total Upah Zaka</div><div class="value" id="zakaUpah">Rp0</div><div class="label" id="zakaUpahSub">-</div></div>
+  <div class="mini-card red"><div class="circle"></div><div class="label">Ambil Farhan</div><div class="value" id="farhanAmbil">Rp0</div></div>
+  <div class="mini-card orange"><div class="circle"></div><div class="label">Ambil Zaka</div><div class="value" id="zakaAmbil">Rp0</div></div>
+  <div class="mini-card green"><div class="circle"></div><div class="label">Sisa Farhan</div><div class="value" id="farhanSisa">Rp0</div></div>
+  <div class="mini-card dark"><div class="circle"></div><div class="label">Sisa Zaka</div><div class="value" id="zakaSisa">Rp0</div></div>
+ </div>
 </div>
 
 <div class="card karyawan-card">
-  <div class="karyawan-header"><div class="avatar farhan">F</div><div class="karyawan-info"><b>Farhan - Karyawan 1</b><small>0813-1563-963 • Upah Harian 80k</small></div><span class="badge badge-green" style="margin-left:auto">Aktif</span></div>
-  <div class="row"><div class="label">Total Upah (1 Bulan)</div><div class="value" style="color:#2563eb" id="farhanUpah2">Rp0</div></div>
-  <div class="row"><div class="label">Pengambilan Uang</div><div class="value" style="color:#dc2626" id="farhanAmbil2">Rp0</div></div>
-  <div class="sisa-box"><div class="label" style="font-weight:800;color:#0f172a">Sisa Upah Bersih</div><b class="value" style="color:#16a34a;font-size:20px" id="farhanSisa2">Rp0</b></div>
-  <div id="farhanLast"></div>
+ <div class="karyawan-header"><div class="avatar farhan">F</div><div class="karyawan-info"><b>Farhan - Karyawan 1</b><small>0813-1563-963 • Upah Harian 80k</small></div><span class="badge badge-green">Aktif</span></div>
+ <div class="row"><div class="label">Total Upah (<span class="periode-text">-</span>)</div><div class="value" style="color:#2563eb" id="farhanUpah2">Rp0</div></div>
+ <div class="row"><div class="label">Pengambilan Uang</div><div class="value" style="color:#dc2626" id="farhanAmbil2">Rp0</div></div>
+ <div class="sisa-box"><div class="label" style="font-weight:800;color:#0f172a">Sisa Upah Bersih</div><b class="value" style="color:#16a34a;font-size:20px" id="farhanSisa2">Rp0</b></div>
 </div>
 
 <div class="card karyawan-card zaka">
-  <div class="karyawan-header"><div class="avatar zaka">Z</div><div class="karyawan-info"><b>Zaka - Karyawan 2</b><small>0831-8663-6396 • Upah Harian 115k</small></div><span class="badge badge-green" style="margin-left:auto">Aktif</span></div>
-  <div class="row"><div class="label">Total Upah (1 Bulan)</div><div class="value" style="color:#7c3aed" id="zakaUpah2">Rp0</div></div>
-  <div class="row"><div class="label">Pengambilan Uang</div><div class="value" style="color:#dc2626" id="zakaAmbil2">Rp0</div></div>
-  <div class="sisa-box"><div class="label" style="font-weight:800;color:#0f172a">Sisa Upah Bersih</div><b class="value" style="color:#16a34a;font-size:20px" id="zakaSisa2">Rp0</b></div>
-  <div id="zakaLast"></div>
+ <div class="karyawan-header"><div class="avatar zaka">Z</div><div class="karyawan-info"><b>Zaka - Karyawan 2</b><small>0831-8663-6396 • Upah Harian 115k</small></div><span class="badge badge-green">Aktif</span></div>
+ <div class="row"><div class="label">Total Upah (<span class="periode-text">-</span>)</div><div class="value" style="color:#7c3aed" id="zakaUpah2">Rp0</div></div>
+ <div class="row"><div class="label">Pengambilan Uang</div><div class="value" style="color:#dc2626" id="zakaAmbil2">Rp0</div></div>
+ <div class="sisa-box"><div class="label" style="font-weight:800;color:#0f172a">Sisa Upah Bersih</div><b class="value" style="color:#16a34a;font-size:20px" id="zakaSisa2">Rp0</b></div>
 </div>
 
 <div class="card">
-  <div class="card-head"><h3>📜 Riwayat Pengambilan</h3><span class="badge" style="background:#dbeafe;color:#1e40af">Bulan Ini</span></div>
-  <div style="max-height:420px;overflow:auto;border-radius:12px;border:1px solid #eef0ff">
-    <table><thead><tr><th>Tanggal</th><th>Nama</th><th>Nominal</th></tr></thead><tbody id="history"><tr><td colspan="3" style="text-align:center;padding:20px;color:#0b63f0;font-weight:700">Memuat...</td></tr></tbody></table>
-  </div>
-  <button class="btn" onclick="loadData()">🔄 Refresh Data</button>
-  <div id="debug"></div>
+ <div class="card-head"><h3>📜 Riwayat Pengambilan</h3><span class="badge" id="historyBadge">-</span></div>
+ <div style="max-height:420px;overflow:auto;border-radius:12px;border:1px solid #eef0ff">
+  <table><thead><tr><th>Tanggal</th><th>Nama</th><th>Nominal</th></tr></thead><tbody id="history"><tr><td colspan="3" style="text-align:center;padding:20px;color:#0b63f0;font-weight:700">Memuat...</td></tr></tbody></table>
+ </div>
+ <button class="btn" onclick="loadData()">🔄 Refresh Data</button>
 </div>
-
 </div>
 
 <script>
-const SHEET_ID = "1iPbtRGldW5yz6tuUZ5oHzMGsnNb4cHyCbAEMkq51qK4";
-const CSV_UPAH = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=UPAH&nocache=${t}`;
-const CSV_FIX = (t) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=FIX%20RUMUS1&nocache=${t}`;
+const SHEET_ID="1iPbtRGldW5yz6tuUZ5oHzMGsnNb4cHyCbAEMkq51qK4";
+const CSV_UPAH=t=>`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=UPAH&nocache=${t}`;
+const CSV_FIX=t=>`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=FIX%20RUMUS1&nocache=${t}`;
+const BULAN=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+let periodeBulan=new Date().getMonth(),periodeTahun=new Date().getFullYear();
 
-function rupiah(n){ return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n)||0); }
+function rupiah(n){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(n)||0)}
+function parseCSV(text){const rows=[];let row=[],field="",inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(c=='"'){if(inQ&&text[i+1]=='"'){field+='"';i++}else inQ=!inQ}else if(c==","&&!inQ){row.push(field);field=""}else if((c=="\n"||c=="\r")&&!inQ){if(field!==""||row.length){row.push(field);rows.push(row);row=[];field=""}if(c=="\r"&&text[i+1]=="\n")i++}else field+=c}if(field!==""||row.length){row.push(field);rows.push(row)}return rows}
+function parseDateFlexible(s){if(!s)return null;s=String(s).trim().replace(/"/g,"");let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);let d=new Date(s);return isNaN(d)?null:d}
+function numUpah(v){if(v==null)return 0;let s=String(v).replace(/[^0-9-]/g,"").trim();if(!s||s=="-")return 0;let n=Number(s);return isNaN(n)?0:n}
 
-function parseCSV(text){const rows=[];let row=[];let field='';let inQ=false;for(let i=0;i<text.length;i++){const c=text[i];if(c=='"'){if(inQ&&text[i+1]=='"'){field+='"';i++}else inQ=!inQ}else if(c==','&&!inQ){row.push(field);field=''}else if((c=='\n'||c=='\r')&&!inQ){if(field!==''||row.length>0){row.push(field);rows.push(row);row=[];field=''}if(c=='\r'&&text[i+1]=='\n')i++}else field+=c}if(field!==''||row.length>0){row.push(field);rows.push(row)}return rows}
+async function fetchCSV(url){const res=await fetch(url,{cache:"no-store"});if(!res.ok)throw new Error("HTTP "+res.status);return parseCSV(await res.text())}
 
-function parseDateFlexible(s){if(!s)return null;s=s.toString().trim().replace(/"/g,'');let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m){return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]))}m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m){return new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]))}const d=new Date(s);return isNaN(d)?null:d}
-
-// FIX TOTAL - anti Rp 1 dan Rp Triliunan
-function num(v){
-  if(v==null) return 0;
-  let s=v.toString().trim();
-  if(s==='') return 0;
-  if(/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s)) return 0; // tanggal
-  if(s.toLowerCase().includes('karyawan')) return 0; // biar "Karyawan 1" gak kebaca 1
-  s=s.replace(/Rp/gi,'').replace(/\./g,'').replace(/,/g,'').replace(/[^0-9\-]/g,'').trim();
-  if(s===''||s==='-') return 0;
-  const n=Number(s);
-  if(isNaN(n) || n < 1000 || n > 5000000) return 0; // pengambilan wajar 1rb - 5jt
-  return n;
+function isiPeriode(){
+ const bs=document.getElementById("bulanSelect"),ts=document.getElementById("tahunSelect");
+ bs.innerHTML=BULAN.map((x,i)=>`<option value="${i}">${x}</option>`).join("");
+ const sekarang=new Date().getFullYear();
+ ts.innerHTML=Array.from({length:8},(_,i)=>sekarang-5+i).map(y=>`<option value="${y}">${y}</option>`).join("");
+ bs.value=periodeBulan;ts.value=periodeTahun;updatePeriode()
 }
-function numUpah(v){
-  if(v==null) return 0;
-  let s=v.toString().replace(/[^0-9\-]/g,'').trim();
-  if(s===''||s==='-') return 0;
-  const n=Number(s);
-  return isNaN(n)?0:n;
+function updatePeriode(){
+ const nama=`${BULAN[periodeBulan]} ${periodeTahun}`;
+ const akhir=new Date(periodeTahun,periodeBulan+1,0).getDate();
+ document.getElementById("badgePeriode").textContent=`1 - ${akhir} ${BULAN[periodeBulan].slice(0,3)}`;
+ document.getElementById("periodeLabel").textContent=`Menampilkan data upah: ${nama}`;
+ document.getElementById("historyBadge").textContent=nama;
+ document.querySelectorAll(".periode-text").forEach(e=>e.textContent=nama);
 }
-async function fetchCSV(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return parseCSV(await res.text())}
-function containsAmbilUang(text){const s=text.toLowerCase();return s.includes('ambil uang')||s.includes('pengambilan uang')||s.includes('ambil unag')}
+function terapkanPeriode(){periodeBulan=+document.getElementById("bulanSelect").value;periodeTahun=+document.getElementById("tahunSelect").value;updatePeriode();loadData()}
 
 async function loadData(){
-  const t=Date.now();
-  try{
-    const [rowsUpahRaw, rowsFixRaw] = await Promise.all([fetchCSV(CSV_UPAH(t)), fetchCSV(CSV_FIX(t))]);
-    let upahHeaderIdx=-1;for(let i=0;i<Math.min(5,rowsUpahRaw.length);i++){if(rowsUpahRaw[i].join(' ').toLowerCase().includes('tanggal')){upahHeaderIdx=i;break}}if(upahHeaderIdx===-1)upahHeaderIdx=1;
-    const upahRows=rowsUpahRaw.slice(upahHeaderIdx+1);
-    let fixHeaderIdx=-1;for(let i=0;i<Math.min(5,rowsFixRaw.length);i++){if(rowsFixRaw[i].join(' ').toLowerCase().includes('karyawan')){fixHeaderIdx=i;break}}if(fixHeaderIdx===-1)fixHeaderIdx=0;
-    const fixRows=rowsFixRaw.slice(fixHeaderIdx+1);
-
-    // === FIX PERIODE - PAKAI BULAN KALENDER SAAT INI, BUKAN latestRaw ===
-    const now = new Date();
-    let startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    let endDate = new Date(now.getFullYear(), now.getMonth()+1, 0);
-    // kalau mau lihat bulan lalu pas tgl 1-3, buka manual? kita kunci bulan ini dulu biar gak loncat
-
-    document.getElementById('badgePeriode').textContent=`1 - ${endDate.getDate()} ${endDate.toLocaleDateString('id-ID',{month:'short'})}`;
-
-    let allDates=[];let parsedUpah=[];
-    upahRows.forEach(r=>{if(!r||r.length<6)return;const d=parseDateFlexible(r[0]);if(!d)return;if(r.join('').trim()==='')return;parsedUpah.push({d,r});allDates.push(d)});
-
-    let farhanUpah=0,zakaUpah=0;
-    parsedUpah.forEach(({d,r})=>{
-      if(d>=startDate&&d<=endDate){
-        farhanUpah+=numUpah(r[5]);
-        zakaUpah+=numUpah(r[11]);
-      }
-    });
-
-    let history=[];let farhanAmbil=0,zakaAmbil=0;
-fixRows.forEach(r=>{
-  const d=parseDateFlexible(r[0]);if(!d)return;
-  if(d<startDate||d>endDate) return;
-  const fullText=r.join(' ').toLowerCase();
-  // CARI KATA KUNCI DI SELURUH BARIS
-  if(!fullText.includes('ambil uang') &&!fullText.includes('pengambilan uang') &&!fullText.includes('ambil unag')) return;
-
-  const isFarhan=fullText.includes('farhan');
-  const isZaka=fullText.includes('zaka');
-  if(!isFarhan&&!isZaka) return;
-
-  // AMBIL NOMINAL HANYA DARI KOLOM M (index 12)
-  let rawM = r[12] || r[11] || "0"; // M dulu, kalau kosong coba L
-  let nominal = Number(rawM.toString().replace(/[^0-9]/g,'')) || 0;
-
-  if(nominal < 1000) return; // skip kalau 0, 1, 2
-
-  history.push({d,karyawan:isFarhan?'farhan':'zaka',nominal});
-  if(isFarhan)farhanAmbil+=nominal;
-  if(isZaka)zakaAmbil+=nominal;
-});
-history.sort((a,b)=>b.d-a.d);
-const farhanSisa=farhanUpah-farhanAmbil;const zakaSisa=zakaUpah-zakaAmbil;
-    document.getElementById('farhanUpah').textContent=rupiah(farhanUpah);document.getElementById('farhanUpah2').textContent=rupiah(farhanUpah);
-    document.getElementById('farhanUpahSub').textContent=`${parsedUpah.filter(p=>p.d>=startDate&&p.d<=endDate).length} hari`;
-    document.getElementById('zakaUpah').textContent=rupiah(zakaUpah);document.getElementById('zakaUpah2').textContent=rupiah(zakaUpah);
-    document.getElementById('zakaUpahSub').textContent=`${parsedUpah.filter(p=>p.d>=startDate&&p.d<=endDate).length} hari`;
-    document.getElementById('farhanAmbil').textContent=rupiah(farhanAmbil);document.getElementById('farhanAmbil2').textContent=rupiah(farhanAmbil);
-    document.getElementById('zakaAmbil').textContent=rupiah(zakaAmbil);document.getElementById('zakaAmbil2').textContent=rupiah(zakaAmbil);
-    document.getElementById('farhanSisa').textContent=rupiah(farhanSisa);document.getElementById('farhanSisa2').textContent=rupiah(farhanSisa);
-    document.getElementById('zakaSisa').textContent=rupiah(zakaSisa);document.getElementById('zakaSisa2').textContent=rupiah(zakaSisa);
-    let htmlHist='';history.slice(0,80).forEach(h=>{const isFarhan=h.karyawan==='farhan';htmlHist+=`<tr><td>${h.d.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}</td><td><span class="pill ${isFarhan?'pill-green':'pill-red'}">${isFarhan?'Farhan':'Zaka'}</span></td><td style="font-weight:800;color:#dc2626">${rupiah(h.nominal)}</td></tr>`});
-    document.getElementById('history').innerHTML=htmlHist||'<tr><td colspan="3" style="text-align:center;padding:20px">Tidak ada data bulan ini</td></tr>';
-  }catch(e){document.getElementById('history').innerHTML=`<tr><td colspan="3" style="color:red">❌ ${e.message}</td></tr>`}
+ const start=new Date(periodeTahun,periodeBulan,1),end=new Date(periodeTahun,periodeBulan+1,0,23,59,59,999);
+ document.getElementById("history").innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:#0b63f0;font-weight:700">Memuat...</td></tr>';
+ try{
+  const [upahRaw,fixRaw]=await Promise.all([fetchCSV(CSV_UPAH(Date.now())),fetchCSV(CSV_FIX(Date.now()))]);
+  let uh=-1;for(let i=0;i<Math.min(5,upahRaw.length);i++)if(upahRaw[i].join(" ").toLowerCase().includes("tanggal")){uh=i;break}if(uh<0)uh=1;
+  let fh=-1;for(let i=0;i<Math.min(5,fixRaw.length);i++)if(fixRaw[i].join(" ").toLowerCase().includes("karyawan")){fh=i;break}if(fh<0)fh=0;
+  const upahRows=upahRaw.slice(uh+1),fixRows=fixRaw.slice(fh+1);
+  let farhanUpah=0,zakaUpah=0,upahHari=0;
+  upahRows.forEach(r=>{if(!r||r.length<6)return;const d=parseDateFlexible(r[0]);if(d&&d>=start&&d<=end&&r.join("").trim()!==""){farhanUpah+=numUpah(r[5]);zakaUpah+=numUpah(r[11]);upahHari++}});
+  let farhanAmbil=0,zakaAmbil=0,history=[];
+  fixRows.forEach(r=>{
+   const d=parseDateFlexible(r[0]);if(!d||d<start||d>end)return;
+   const text=r.join(" ").toLowerCase();
+   if(!text.includes("ambil uang")&&!text.includes("pengambilan uang")&&!text.includes("ambil unag"))return;
+   const f=text.includes("farhan"),z=text.includes("zaka");if(!f&&!z)return;
+   const raw=r[12]||r[11]||"0",nominal=Number(String(raw).replace(/[^0-9]/g,""))||0;if(nominal<1000)return;
+   history.push({d,karyawan:f?"farhan":"zaka",nominal});if(f)farhanAmbil+=nominal;else zakaAmbil+=nominal;
+  });
+  history.sort((a,b)=>b.d-a.d);
+  const fs=farhanUpah-farhanAmbil,zs=zakaUpah-zakaAmbil;
+  ["farhanUpah","farhanUpah2"].forEach(id=>document.getElementById(id).textContent=rupiah(farhanUpah));
+  ["zakaUpah","zakaUpah2"].forEach(id=>document.getElementById(id).textContent=rupiah(zakaUpah));
+  document.getElementById("farhanUpahSub").textContent=`${upahHari} hari`;document.getElementById("zakaUpahSub").textContent=`${upahHari} hari`;
+  ["farhanAmbil","farhanAmbil2"].forEach(id=>document.getElementById(id).textContent=rupiah(farhanAmbil));
+  ["zakaAmbil","zakaAmbil2"].forEach(id=>document.getElementById(id).textContent=rupiah(zakaAmbil));
+  ["farhanSisa","farhanSisa2"].forEach(id=>document.getElementById(id).textContent=rupiah(fs));
+  ["zakaSisa","zakaSisa2"].forEach(id=>document.getElementById(id).textContent=rupiah(zs));
+  document.getElementById("history").innerHTML=history.slice(0,80).map(h=>`<tr><td>${h.d.toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"})}</td><td><span class="pill ${h.karyawan=="farhan"?"pill-green":"pill-red"}">${h.karyawan=="farhan"?"Farhan":"Zaka"}</span></td><td style="font-weight:800;color:#dc2626">${rupiah(h.nominal)}</td></tr>`).join("")||`<tr><td colspan="3" style="text-align:center;padding:20px">Tidak ada data pengambilan ${BULAN[periodeBulan]} ${periodeTahun}</td></tr>`;
+ }catch(e){document.getElementById("history").innerHTML=`<tr><td colspan="3" style="color:red;padding:12px">❌ ${e.message}</td></tr>`}
 }
-loadData();
+isiPeriode();loadData();
 </script>
 </body>
 </html>
